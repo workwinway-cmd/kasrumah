@@ -1754,6 +1754,10 @@ function computeMonthlyReport(y, m){
     .filter(e=>{
       const d = new Date(e.tanggal+'T00:00:00');
       if(bound && d < bound) return false;
+      // Transaksi antar dua akun yang sama-sama bagian dari grup Kas (mis. transfer
+      // Kas Utama -> Kas Kecil) bersifat internal & netral terhadap total saldo Kas,
+      // sehingga tidak boleh dihitung sebagai Kas Masuk/Keluar di laporan ini.
+      if(isKasAccount(e.debit) && isKasAccount(e.kredit)) return false;
       return d >= monthStart && d < monthEnd && (isKasAccount(e.debit) || isKasAccount(e.kredit));
     })
     .sort((a,b)=> a.tanggal.localeCompare(b.tanggal) || a.id - b.id);
